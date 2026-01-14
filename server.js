@@ -16,13 +16,25 @@ if (!NIM_API_KEY) {
   process.exit(1);
 }
 
-// Security middleware - optional custom authentication
+// Security middleware - supports both bearer token and custom header
 const authenticate = (req, res, next) => {
   if (CUSTOM_AUTH_TOKEN) {
-    const token = req.headers[CUSTOM_AUTH_HEADER.toLowerCase()];
-    if (token !== CUSTOM_AUTH_TOKEN) {
-      return res.status(401).json({ error: 'Unauthorized' });
+    // Check for Bearer token first (standard)
+    const authHeader = req.headers['authorization'];
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      if (token === CUSTOM_AUTH_TOKEN) {
+        return next();
+      }
     }
+    
+    // Fallback to custom header
+    const customToken = req.headers[CUSTOM_AUTH_HEADER.toLowerCase()];
+    if (customToken === CUSTOM_AUTH_TOKEN) {
+      return next();
+    }
+    
+    return res.status(401).json({ error: 'Unauthorized' });
   }
   next();
 };
@@ -83,6 +95,10 @@ app.post('/v1/chat/completions', authenticate, async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`NVIDIA NIM Proxy running on port ${PORT}`);
+  console.log(`Custom auth: ${CUSTOM_AUTH_TOKEN ? 'ENABLED (Bearer token or custom header)' : 'DISABLED'}`);
+});
 app.listen(PORT, () => {
   console.log(`NVIDIA NIM Proxy running on port ${PORT}`);
   console.log(`Custom auth: ${CUSTOM_AUTH_TOKEN ? 'ENABLED' : 'DISABLED'}`);
