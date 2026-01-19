@@ -99,7 +99,3 @@ app.listen(PORT, () => {
   console.log(`NVIDIA NIM Proxy running on port ${PORT}`);
   console.log(`Custom auth: ${CUSTOM_AUTH_TOKEN ? 'ENABLED (Bearer token or custom header)' : 'DISABLED'}`);
 });
-app.listen(PORT, () => {
-  console.log(`NVIDIA NIM Proxy running on port ${PORT}`);
-  console.log(`Custom auth: ${CUSTOM_AUTH_TOKEN ? 'ENABLED' : 'DISABLED'}`);
-});
